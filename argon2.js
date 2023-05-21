@@ -1,12 +1,10 @@
 "use strict";
 const assert = require("assert");
 const { randomBytes, timingSafeEqual } = require("crypto");
-const path = require("path");
 const { promisify } = require("util");
-const binary = require("@mapbox/node-pre-gyp");
+const gypBuild = require("node-gyp-build");
 
-const bindingPath = binary.find(path.resolve(__dirname, "./package.json"));
-const { hash: _hash } = require(bindingPath);
+const { hash: _hash } = gypBuild(__dirname);
 
 const { deserialize, serialize } = require("@phc/format");
 
