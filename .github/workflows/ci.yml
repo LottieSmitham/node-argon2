@@ -11,11 +11,8 @@ jobs:
   test:
     strategy:
       matrix:
-        node-version: [14, 16, 18]
+        node-version: [16, 18, 20]
         os: [ubuntu-20.04, macos-11, macos-m1, windows-2019]
-        exclude:
-          - node-version: 14
-            os: macos-m1
 
     name: Test for node-${{ matrix.node-version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -37,13 +34,10 @@ jobs:
     - name: Run tests
       run: yarn test
 
-    - name: "[Linux] Install lcov"
-      if: matrix.os == 'ubuntu-20.04'
-      run: sudo apt install lcov
-
     - name: "[Linux] Generate coverage"
       if: matrix.os == 'ubuntu-20.04'
       run: |
+        sudo apt install lcov
         cp -rl build/* build-tmp-napi-v3
         rm -r build
         yarn c8 report --reporter=text-lcov > lcov-js.info
