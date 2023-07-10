@@ -4,14 +4,11 @@ on:
   release:
     types: [published]
 
-env:
-  npm_config_build_from_source: true
-
 jobs:
   build:
     strategy:
       matrix:
-        node-version: 16
+        node-version: [16]
         os: [ubuntu-20.04, macos-11, windows-2019]
 
     name: Build on ${{ matrix.os }}
@@ -29,13 +26,15 @@ jobs:
           cache: yarn
           node-version: ${{ matrix.node-version }}
 
+      - run: corepack enable yarn
+
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
       - name: Prebuild
         run: yarn build
 
-      - name: Upload Artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           path: prebuilds/**/*.node
@@ -61,7 +60,7 @@ jobs:
       - name: Prebuild
         run: yarn build
 
-      - name: Upload Artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           path: prebuilds/**/*.node
@@ -83,16 +82,13 @@ jobs:
         with:
           submodules: true
 
-      - uses: uraimo/run-on-arch-action@v2.2.0
-        name: Package artifacts
-        id: build
+      - name: Prebuild
+        uses: uraimo/run-on-arch-action@v2.2.0
         with:
           arch: ${{ matrix.arch }}
           distro: ${{ matrix.distro }}
           setup: mkdir -p "${PWD}/artifacts"
           dockerRunArgs: --volume "${PWD}:/repo"
-          env: |
-            npm_config_build_from_source: true
           install: |
             case "${{ matrix.distro }}" in
               ubuntu*|jessie|stretch|buster)
@@ -113,7 +109,7 @@ jobs:
             yarn install --frozen-lockfile
             yarn build
 
-      - name: Upload Artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           path: prebuilds/**/*.node
@@ -128,18 +124,18 @@ jobs:
         with:
           submodules: true
 
-      - uses: vmactions/freebsd-vm@v0
-        name: Package artifacts
+      - name: Package artifacts
+        uses: vmactions/freebsd-vm@v0
         with:
           envs: "npm_config_build_from_source"
           prepare: |
-            pkg install -y gmake python3 yarn-node14
+            pkg install -y gmake python3 yarn-node16
           run: |
             yarn install --frozen-lockfile
             yarn build
           sync: sshfs
 
-      - name: Upload Artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           path: prebuilds/**/*.node
@@ -155,19 +151,15 @@ jobs:
         with:
           submodules: true
 
-      - name: Use Node.js 14
+      - name: Use Node.js 16
         uses: actions/setup-node@v3
         with:
           cache: yarn
-          node-version: 14
+          node-version: 16
           registry-url: https://registry.npmjs.org/
 
-      - uses: actions/download-artifact@v3
-        with:
-          name: my-artifact
-
-      - name: Display structure of downloaded files
-        run: ls -R
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
 
       - name: Publish to NPM
         run: yarn publish

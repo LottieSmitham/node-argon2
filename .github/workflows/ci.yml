@@ -56,7 +56,7 @@ jobs:
     name: Test on Alpine Linux
     runs-on: ubuntu-latest
     container:
-      image: node:14-alpine
+      image: node:16-alpine
 
     steps:
       - name: Install build deps
@@ -76,7 +76,7 @@ jobs:
   test-freebsd:
     strategy:
       matrix:
-        node-version: [14, 16, 18]
+        node-version: [16, 18, 20]
 
     name: Test for node-${{ matrix.node-version }} on FreeBSD
     runs-on: macos-12

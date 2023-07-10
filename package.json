@@ -19,7 +19,8 @@
   },
   "license": "MIT",
   "author": "Ranieri Althoff <ranisalt+argon2@gmail.com>",
-  "main": "argon2.js",
+  "type": "module",
+  "main": "argon2.mjs",
   "types": "argon2.d.ts",
   "files": [
     "argon2_node.cpp",
@@ -40,29 +41,31 @@
     "binding.gyp",
     "prebuilds/**/*"
   ],
+  "binary": {
+    "napi_versions": [
+      8
+    ]
+  },
   "scripts": {
-    "build": "prebuildify --napi --strip",
-    "format": "prettier --write \"**/*.{js,json,ts}\"",
+    "build": "prebuildify --napi --strip --tag-armv --tag-libc",
+    "format": "prettier --write \"**/*.{json,mjs,ts}\"",
     "install": "node-gyp-build",
-    "test": "c8 mocha test/test.js",
-    "test:ts": "tsc -p . && node test/test-d.js"
+    "test": "node --experimental-test-coverage --test test.mjs",
+    "test-ts": "tsc -p . && node test/test-d.js"
   },
   "dependencies": {
     "@phc/format": "^1.0.0",
+    "node-addon-api": "^7.0.0",
     "node-gyp-build": "^4.6.0"
   },
   "devDependencies": {
-    "@types/node": "^20.2.1",
-    "c8": "^7.13.0",
-    "mocha": "^10.2.0",
-    "node-addon-api": "^6.0.0",
-    "node-gyp": "^9.3.1",
+    "@types/node": "^20.4.1",
     "prebuildify": "^5.0.1",
-    "prettier": "^2.8.7",
-    "typescript": "^5.0.3"
+    "prettier": "^3.0.0",
+    "typescript": "^5.1.6"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=14.17.0"
   },
   "collective": {
     "type": "opencollective",

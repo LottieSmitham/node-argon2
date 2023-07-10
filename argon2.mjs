@@ -1,26 +1,29 @@
 "use strict";
-const assert = require("assert");
-const { randomBytes, timingSafeEqual } = require("crypto");
-const { promisify } = require("util");
-const gypBuild = require("node-gyp-build");
+import { deserialize, serialize } from "@phc/format";
+import gypBuild from "node-gyp-build";
+import { randomBytes, timingSafeEqual } from "node:crypto";
+import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
 
-const { hash: _hash } = gypBuild(__dirname);
+const { hash: _hash } = gypBuild(fileURLToPath(new URL(".", import.meta.url)));
 
-const { deserialize, serialize } = require("@phc/format");
+export const argon2d = 0;
+export const argon2i = 1;
+export const argon2id = 2;
 
-const types = Object.freeze({ argon2d: 0, argon2i: 1, argon2id: 2 });
+const types = Object.freeze({ argon2d, argon2i, argon2id });
 
-const defaults = Object.freeze({
+export const defaults = Object.freeze({
   hashLength: 32,
   saltLength: 16,
   timeCost: 3,
   memoryCost: 1 << 16,
   parallelism: 4,
-  type: types.argon2id,
+  type: argon2id,
   version: 0x13,
 });
 
-const limits = Object.freeze({
+export const limits = Object.freeze({
   hashLength: { min: 4, max: 2 ** 32 - 1 },
   memoryCost: { min: 1 << 10, max: 2 ** 32 - 1 },
   timeCost: { min: 2, max: 2 ** 32 - 1 },
@@ -28,9 +31,9 @@ const limits = Object.freeze({
 });
 
 const names = Object.freeze({
-  [types.argon2d]: "argon2d",
-  [types.argon2i]: "argon2i",
-  [types.argon2id]: "argon2id",
+  [argon2d]: "argon2d",
+  [argon2i]: "argon2i",
+  [argon2id]: "argon2id",
 });
 
 const bindingsHash = promisify(_hash);
@@ -40,13 +43,13 @@ const assertLimits =
   (options) =>
   ([key, { max, min }]) => {
     const value = options[key];
-    assert(
-      min <= value && value <= max,
-      `Invalid ${key}, must be between ${min} and ${max}.`
-    );
+
+    if (min > value || value > max) {
+      throw new Error(`Invalid ${key}, must be between ${min} and ${max}.`);
+    }
   };
 
-const hash = async (plain, { raw, salt, ...options } = {}) => {
+export const hash = async (plain, { raw, salt, ...options } = {}) => {
   options = { ...defaults, ...options };
 
   Object.entries(limits).forEach(assertLimits(options));
@@ -75,7 +78,7 @@ const hash = async (plain, { raw, salt, ...options } = {}) => {
   });
 };
 
-const needsRehash = (digest, options) => {
+export const needsRehash = (digest, options) => {
   const { memoryCost, timeCost, version } = { ...defaults, ...options };
 
   const {
@@ -85,7 +88,7 @@ const needsRehash = (digest, options) => {
   return +v !== +version || +m !== +memoryCost || +t !== +timeCost;
 };
 
-const verify = async (digest, plain, options) => {
+export const verify = async (digest, plain, options) => {
   const obj = deserialize(digest);
   // Only these have the "params" key, so if the password was encoded
   // using any other method, the destructuring throws an error
@@ -112,8 +115,6 @@ const verify = async (digest, plain, options) => {
       parallelism: +p,
       ...(data ? { associatedData: Buffer.from(data, "base64") } : {}),
     }),
-    hash
+    hash,
   );
 };
-
-module.exports = { defaults, limits, hash, needsRehash, verify, ...types };
