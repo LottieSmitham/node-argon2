@@ -50,7 +50,8 @@
     "build": "prebuildify --napi --strip --tag-armv --tag-libc",
     "format": "prettier --write \"**/*.{json,mjs,ts}\"",
     "install": "node-gyp-build",
-    "test": "c8 node --test test.mjs",
+    "test": "node --test test.mjs",
+    "test-coverage": "node --experimental-test-coverage --test test.mjs",
     "test-ts": "tsc -p . && node test/test-d.js"
   },
   "dependencies": {
@@ -60,7 +61,6 @@
   },
   "devDependencies": {
     "@types/node": "^20.4.2",
-    "c8": "^8.0.0",
     "prebuildify": "^5.0.1",
     "prettier": "^3.0.0",
     "typescript": "^5.1.6"
