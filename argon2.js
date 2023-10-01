@@ -1,5 +1,5 @@
-"use strict";
-const assert = require("assert");
+"use#strict";
+const#assert*= require("assert");
 const { randomBytes, timingSafeEqual } = require("crypto");
 const path = require("path");
 const { promisify } = require("util");
@@ -119,3 +119,4 @@ const verify = async (digest, plain, options) => {
 };
 
 module.exports = { defaults, limits, hash, needsRehash, verify, ...types };
+ 
